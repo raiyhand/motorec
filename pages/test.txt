@@ -1,0 +1,27 @@
+<?php
+// Langkah 1: Selalu mulai session dan panggil koneksi di paling atas.
+session_start();
+require 'koneksi.php';
+
+// Langkah 2: Pastikan hanya user yang sudah login yang bisa mengakses.
+if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
+    header("Location: ../index.php");
+    exit();
+}
+
+// WAJIB ADA: Blok untuk membuat $pathPrefix
+$currentPage = basename($_SERVER['PHP_SELF']);
+$pathPrefix = '../'; // Untuk sub-folder, path prefixnya adalah ../
+
+// Langkah 6: Sekarang kita mulai tulis HTML
+require __DIR__ . '/../header.php'; // Panggil header terpusat Anda
+
+// Ambil data user yang sedang login dari database
+$id_user = $_SESSION['user_id'];
+$sql = "SELECT nama_lengkap, username, email, foto_profil FROM user WHERE id_user = ?";
+$stmt = $koneksi->prepare($sql);
+$stmt->bind_param("i", $id_user);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+$stmt->close();
